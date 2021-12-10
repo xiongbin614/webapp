@@ -13,30 +13,38 @@
         <el-button type="danger" plain size="mini" @click="delProcess(j)">删除流程</el-button>
         <el-button type="primary" plain size="mini"  @click="addGx(k.name)">新增工序</el-button>
       </div>
-        
-      <el-card :name='k.name' style="margin-right:24px; width:186px" v-for="(item, i) in k.list" :key="i">
+      <div class="processTwo">
+        <!-- <el-card :name='k.name' style="margin-right:20px; width:11%;margin-bottom:5px" v-for="(item, i) in k.list" :key="i"> -->
+        <el-card :name='k.name' style="width:11%;margin-bottom:5px;height:100px" v-for="(item, i) in k.list" :key="i">
         <div slot="header">
-          <span>{{item.name}}</span>
-          <el-popconfirm
-            title="确定删除该工序吗？"
-            @onConfirm="delGx(k.list, i)"
-          >
-            <i  slot="reference" class="el-icon-delete" style="float: right;margin-left:5px" />
-          </el-popconfirm>
-          <el-popover
-            placement="right"
-            width="400"
-            trigger="click">
-            <el-input placeholder="请输入内容" v-model="item.name" />
-              <i class="el-icon-edit" slot="reference" style="float: right"></i>
-          </el-popover>
-          
+          <div style="text-align: center;margin-bottom:5px">{{item.name}}</div>
+          <div  style="text-align: center;">
+            <el-popover
+              placement="right"
+              width="400"
+              trigger="click">
+              <el-input placeholder="请输入内容" v-model="item.name" />
+                <i class="el-icon-edit" slot="reference"></i>
+            </el-popover>
+            <el-popconfirm
+              title="确定删除该工序吗？"
+              @onConfirm="delGx(k.list, i)"
+            >
+               <i  slot="reference" class="el-icon-delete" style="margin-left:8px" />
+            </el-popconfirm>
+          </div>
         </div>
-        <draggable @end='onEnd'  :value="item.list" :class="item.name" :group='{name: "o", put: true}'>
+        <div @click="clickGx(item.list)" style="text-align: center">
+          <span v-if="item.list && item.list.length === 0" style="font-size: 12px; color: #ccc;">请新增员工名字</span>
+          <el-tag size='mini' v-else style="margin-right:5px" 
+          v-for="o in item.list" @close="removeSledPel(item.list, o)" closable :key="o">{{o}}</el-tag>
+        </div>
+        <!-- <draggable @click="clickGx" @end='onEnd'  :value="item.list" :class="item.name" :group='{name: "o", put: true}' style="text-align: center">
           <span v-if="item.list && item.list.length === 0" style="font-size: 12px; color: #ccc;">请将下面员工名字拖到此处</span>
-          <el-tag v-else style="margin-right:5px" v-for="o in item.list"  :key="o">{{o}}</el-tag>
-        </draggable>
-      </el-card>
+          <el-tag size='mini' v-else style="margin-right:5px" v-for="o in item.list"  :key="o">{{o}}</el-tag>
+        </draggable> -->
+        </el-card>
+      </div>
     </div>
     
     <div class="peopleflex">
@@ -44,10 +52,22 @@
         <div slot="header">
           <el-button type="primary" @click="dialogVisible = true; form.list = ''">新增人员</el-button>
         </div>
-        <draggable :value="peopleList" @end='onEnd'  class="people" :group='{name: "item", put: true}'>
+        <div>
           <span v-if="peopleList && peopleList.length === 0" style="font-size: 12px; color: #ccc;">请先点击上面新增人员按钮新增人员</span>
-          <el-tag v-else type="success" @close="handleClose(item)" :disable-transitions="false" closable style="margin-right:5px" v-for="item in peopleList" :key="item">{{item}}</el-tag>
-        </draggable>
+          <el-tag v-else @click="seledPelClick(item)" type="success" 
+          @close="handleClose(item)" :disable-transitions="false" 
+          :effect="item === name ? 'dark': 'plain'"
+          closable style="margin-right:5px" v-for="item in peopleList" 
+          :key="item">{{item}}</el-tag>
+        </div>
+        <!-- <draggable :value="peopleList" @end='onEnd'  class="people" :group='{name: "item", put: true}'>
+          <span v-if="peopleList && peopleList.length === 0" style="font-size: 12px; color: #ccc;">请先点击上面新增人员按钮新增人员</span>
+          <el-tag v-else @click="seledPelClick(item)" type="success" 
+          @close="handleClose(item)" :disable-transitions="false" 
+          :effect="item === name ? 'dark': 'plain'"
+          closable style="margin-right:5px" v-for="item in peopleList" 
+          :key="item">{{item}}</el-tag>
+        </draggable> -->
       </el-card>
     </div>
     <!-- 新增流程弹窗 -->
@@ -79,11 +99,12 @@
   </div>
 </template>
 <script>
-import draggable from 'vuedraggable'
+// import draggable from 'vuedraggable'
 export default {
   name:'app',
   data() {
     return {
+      name: '',
       dialogVisible: false,
       processList: [],
       form: {
@@ -93,7 +114,7 @@ export default {
     }
   },
   components: {
-    draggable
+    // draggable
   },
   watch: {
     processList: {
@@ -131,8 +152,19 @@ export default {
     }
   },
   methods: {
+    removeSledPel(list, name) {
+      list.splice(list.findIndex(item=> item === name),1)
+    },
+    clickGx(list) {
+      if (!this.name) return
+      list.push(this.name)
+      this.peopleList.splice(this.peopleList.findIndex(item=> item === this.name),1)
+      this.name = ''
+    },
+    seledPelClick(name) {
+      this.name = name
+    },
     delGx(list, i) {
-      console.log(99)
       if (list.length === 1) return
       list.splice(i, 1)
     },
@@ -145,7 +177,6 @@ export default {
           })
         }
       })
-      // this.processList.splice(j, 1)
     },
     delProcess(j) {
       if (this.processList.length === 1) return
@@ -189,6 +220,7 @@ export default {
       arr.forEach(item=> {
         this.peopleList.push(item)
       })
+      console.log(this.peopleList)
       this.dialogVisible = false
     },
     addProcess() {
@@ -255,16 +287,28 @@ export default {
   margin-bottom: 16px;
   border: 1px solid #ccc;
   padding: 5px 0;
+  
 }
 #app .el-card__header {
   padding: 18px 20px;
   padding-right: 5px;
 }
 .processOne {
-  width: 160px;
+  width: 200px;
   padding: 10px;
   text-align: left;
 }
+.processTwo {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+}
+.processTwo .el-card__body {
+  padding: 10px;
+}
+#app .processTwo  .el-card__header {
+  padding: 6px 0;
+  }
 .processOne .el-button {
    margin-left: 0 !important;
    margin-bottom: 5px;
