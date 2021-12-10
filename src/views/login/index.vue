@@ -1,0 +1,110 @@
+<template>
+    <div class="login-container">
+        <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on" label-position="left">
+
+            <div class="title-container">
+                <h3 class="title">用户登录</h3>
+            </div>
+
+            <el-form-item prop="username">
+                <el-input
+                        ref="username"
+                        v-model="loginForm.username"
+                        placeholder="Username"
+                        name="username"
+                        type="text"
+                        tabindex="1"
+                        autocomplete="on"
+                />
+            </el-form-item>
+            <el-tooltip v-model="capsTooltip" content="Caps lock is On" placement="right" manual>
+                <el-form-item prop="password">
+                    <el-input
+                            :key="passwordType"
+                            ref="password"
+                            v-model="loginForm.password"
+                            :type="passwordType"
+                            placeholder="Password"
+                            name="password"
+                            tabindex="2"
+                            autocomplete="on"
+                            @blur="capsTooltip = false"
+                            @keyup.enter.native="handleLogin"
+                    />
+                </el-form-item>
+            </el-tooltip>
+            <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
+        </el-form>
+    </div>
+</template>
+
+<script>
+    export default {
+        name: "index",
+        data () {
+            return {
+                loginForm: {
+                    username: 'admin',
+                    password: '111111'
+                },
+                loginRules: {
+                    username: [{ required: true, trigger: 'blur', message: "请输入用户名" }],
+                    password: [{ required: true, trigger: 'blur', message: "请输入密码" }]
+                },
+                passwordType: 'password',
+                capsTooltip: false,
+                loading: false,
+                showDialog: false,
+                redirect: undefined,
+                otherQuery: {}
+            }
+        },
+        methods: {
+            handleLogin () {
+                var _t = this;
+                _t.$refs.loginForm.validate(valid => {
+                    if (valid) {
+                        _t.loading = true
+                        _t.$router.push('/Home')
+                    } else {
+                        console.log('error submit!!')
+                        return false
+                    }
+                })
+            }
+        },
+        computed: {
+
+        }
+    }
+</script>
+
+    <style  scoped>
+     /*body {*/
+     /*    height: 100%;*/
+     /*}*/
+     .login-form {
+         position: relative;
+         width: 520px;
+         max-width: 100%;
+         padding: 160px 35px 0;
+         margin: 0 auto;
+         overflow: hidden;
+     }
+     .title-container {
+         position: relative;
+     }
+     .title-container .title {
+         font-size: 26px;
+         color: #eee;
+         margin: 0px auto 40px auto;
+         text-align: center;
+         font-weight: bold;
+     }
+    .login-container {
+        width: 100%;
+        min-height: 100%;
+        background-color: #2d3a4b;
+        overflow: hidden;
+    }
+</style>
