@@ -36,8 +36,8 @@
         </div>
         <div @click="clickGx(item.list)" style="text-align: center">
           <span v-if="item.list && item.list.length === 0" style="font-size: 12px; color: #ccc;">请新增员工名字</span>
-          <el-tag size='mini' v-else style="margin-right:5px" 
-          v-for="o in item.list" @close="removeSledPel(item.list, o)" closable :key="o">{{o}}</el-tag>
+          <el-tag :effect="o === name1 ? 'dark': 'plain'" size='mini' @click.stop="seledPelClick1(item, o)" v-else style="margin-right:5px" 
+          v-for="o in item.list" @close="removeSledPel(item.list, o)"  :key="o">{{o}}</el-tag>
         </div>
         <!-- <draggable @click="clickGx" @end='onEnd'  :value="item.list" :class="item.name" :group='{name: "o", put: true}' style="text-align: center">
           <span v-if="item.list && item.list.length === 0" style="font-size: 12px; color: #ccc;">请将下面员工名字拖到此处</span>
@@ -52,7 +52,7 @@
         <div slot="header">
           <el-button type="primary" @click="dialogVisible = true; form.list = ''">新增人员</el-button>
         </div>
-        <div>
+        <div @click="clickTopel">
           <span v-if="peopleList && peopleList.length === 0" style="font-size: 12px; color: #ccc;">请先点击上面新增人员按钮新增人员</span>
           <el-tag v-else @click="seledPelClick(item)" type="success" 
           @close="handleClose(item)" :disable-transitions="false" 
@@ -104,7 +104,9 @@ export default {
   name:'app',
   data() {
     return {
+      item1: {}, // 信息选中工序名字
       name: '',
+      name1: '',
       dialogVisible: false,
       processList: [],
       form: {
@@ -152,17 +154,56 @@ export default {
     }
   },
   methods: {
+    clickTopel() {
+      if (this.name1) {
+        this.peopleList.push(this.name1)
+        this.processList.forEach(item=>{
+          item.list.forEach(i=>{
+            if (i.name === this.item1.name) {
+              i.list.splice(i.list.indexOf(this.item1.name), 1)
+              this.name1 = ''
+              this.item1 = {}
+            }
+          })
+        })
+      }
+    },
+    seledPelClick1(item, o) {
+      if (this.name1 === o) {
+        this.name1 = ''
+      } else {
+         this.name1 = o
+         this.item1 = item
+      }
+    },
     removeSledPel(list, name) {
       list.splice(list.findIndex(item=> item === name),1)
     },
     clickGx(list) {
-      if (!this.name) return
-      list.push(this.name)
-      this.peopleList.splice(this.peopleList.findIndex(item=> item === this.name),1)
-      this.name = ''
+      if (this.name) {
+        list.push(this.name)
+        this.peopleList.splice(this.peopleList.findIndex(item=> item === this.name),1)
+        this.name = ''
+      } else if (this.name1) {
+        list.push(this.name1)
+        this.processList.forEach(item=>{
+          item.list.forEach(i=>{
+            if (i.name === this.item1.name) {
+              i.list.splice(i.list.indexOf(this.item1.name), 1)
+              this.name1 = ''
+              this.item1 = {}
+            }
+          })
+        })
+        this.name1 = ''
+      }
     },
     seledPelClick(name) {
-      this.name = name
+      if (this.name === name) {
+        this.name = ''
+      } else {
+        this.name = name
+      }
     },
     delGx(list, i) {
       if (list.length === 1) return
